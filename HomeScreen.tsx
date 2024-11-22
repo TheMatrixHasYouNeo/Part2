@@ -1,62 +1,53 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { View, Text, Button, StyleSheet } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import AveragePrice from '../components/AveragePrice';
+import MenuItemList from '../components/MenuItemList';
 
-type MenuItem = {
-  name: string;
-  description: string;
-  course: string;
-  price: string;
-};
+// Define the type for the navigation prop
+type HomeScreenNavigationProp = StackNavigationProp<any, 'Home'>;
 
-const HomeScreen = () => {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const navigation = useNavigation();
-  const route = useRoute();
+interface Props {
+  navigation: HomeScreenNavigationProp;
+}
 
-  useEffect(() => {
-    if (route.params?.newItem) {
-      setMenuItems((prevItems) => [...prevItems, route.params.newItem]);
-    }
-  }, [route.params?.newItem]);
+const HomeScreen: React.FC<Props> = ({ navigation }) => {
+  // Define menu items with id
+  const [menuItems, setMenuItems] = useState([
+    { id: '1', name: 'Soup', price: 50, course: 'Starter' },
+    { id: '2', name: 'Steak', price: 150, course: 'Main' },
+    { id: '3', name: 'Ice Cream', price: 80, course: 'Dessert' },
+  ]);
+
+  // Function to remove a menu item
+  const onRemoveItem = (id: string) => {
+    setMenuItems(prevItems => prevItems.filter(item => item.id !== id));
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Christoffel's Menu</Text>
-      <Button title="Add Menu Item" onPress={() => navigation.navigate('Add Menu Item')} />
-      <Text>Total Items: {menuItems.length}</Text>
-      <FlatList
-        data={menuItems}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.itemContainer}>
-            <Text style={styles.itemText}>{item.name} - {item.course}</Text>
-            <Text style={styles.itemText}>{item.description}</Text>
-            <Text style={styles.itemText}>Price: {item.price}</Text>
-          </View>
-        )}
+      {/* Display average price */}
+      <AveragePrice menuItems={menuItems} />
+      {/* Display list of menu items with remove functionality */}
+      <MenuItemList menuItems={menuItems} onRemoveItem={onRemoveItem} />
+      {/* Button to navigate to Add Menu screen */}
+      <Button 
+        title="Add Menu Items" 
+        onPress={() => navigation.navigate('AddMenu', { menuItems, setMenuItems })} 
+      />
+      {/* Button to navigate to Filter Menu screen */}
+      <Button 
+        title="Filter Menu" 
+        onPress={() => navigation.navigate('Filter', { menuItems })} 
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  itemContainer: {
-    marginVertical: 10,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-  },
-  itemText: {
-    fontSize: 16,
+  container: { 
+    flex: 1, 
+    padding: 20 
   },
 });
 
